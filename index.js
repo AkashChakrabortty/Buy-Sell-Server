@@ -14,14 +14,20 @@ const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@clu
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
 async function run(){
+    const userCollection = client.db('Assignment12').collection('users');
     try{
-          //find all element from database
-          
+          //insert userinfo into the database
+          app.post('/storeUser' , async(req,res)=>{
+            const userInfo = req.body;
+            console.log(userInfo)
+            const result = await userCollection.insertOne(userInfo)
+            res.send(result)
+          })
 
     }
 
     catch{
-
+        console.log('server error')
     }
 }
 run().catch(err => console.log(err))
