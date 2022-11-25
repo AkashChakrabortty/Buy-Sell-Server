@@ -21,6 +21,17 @@ async function run() {
   const userCollection = client.db("Assignment12").collection("users");
   const productCollection = client.db("Assignment12").collection("products");
   try {
+
+    //find a seller's all Product
+    app.get("/dashboard/myProducts/:email", async (req, res) => {
+      const email = req.params.email;
+      console.log('email')
+      const query = { SellerEmail :email};
+      const cursor = productCollection.find(query);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
     //find all ProductCategories
     app.get("/ProductCategories", async (req, res) => {
       const query = {};
