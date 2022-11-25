@@ -21,9 +21,18 @@ async function run() {
   const userCollection = client.db("Assignment12").collection("users");
   const productCollection = client.db("Assignment12").collection("products");
   const advertiseCollection = client.db("Assignment12").collection("advertise");
-
+  const bookingCollection = client.db("Assignment12").collection("booking");
   
   try {
+
+
+    //find all advertise Product
+    app.get("/advertiseItems", async (req, res) => {
+      const query = { };
+      const cursor = advertiseCollection.find(query);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
 
     //find a seller's all Product
     app.get("/dashboard/myProducts/:email", async (req, res) => {
@@ -42,11 +51,28 @@ async function run() {
       const result = await cursor.toArray();
       res.send(result);
     });
+
+     //find all user
+     app.get("/user", async (req, res) => {
+      const query = {};
+      const cursor = userCollection.find(query);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
     //insert userinfo into the database
     app.post("/storeUser", async (req, res) => {
       const userInfo = req.body;
-      console.log(userInfo);
+      // console.log(userInfo);
       const result = await userCollection.insertOne(userInfo);
+      res.send(result);
+    });
+
+     //insert bookinginfo into the database
+     app.post("/booking", async (req, res) => {
+      const bookingInfo = req.body;
+      console.log(bookingInfo);
+      const result = await bookingCollection.insertOne(bookingInfo);
       res.send(result);
     });
 
@@ -77,15 +103,16 @@ async function run() {
           res.send(result);
         });
 
-        // app.patch("/akash", async (req, res) => {
-        //   const filter = { ProductName: 'Redmi note 9' };
+        // app.patch("/akash/:email", async (req, res) => {
+        //   const email = req.params.email;
+        //   const filter = { email: email };
         //   const options = { upsert: true };
         //   const updateDoc = {
         //     $set: {
-        //       SalesStatus: `Available`
+        //       SellerVerify: false
         //     },
         //   };
-        //   const result = await productCollection.updateOne(filter, updateDoc, options);
+        //   const result = await userCollection.updateOne(filter, updateDoc, options);
         //   res.send(result);
         // });
       
@@ -108,13 +135,44 @@ async function run() {
     res.send(result);
     });
 
-     //find all advertise Product
-     app.get("/advertiseItems", async (req, res) => {
-     
-      const query = { };
-      const cursor = advertiseCollection.find(query);
-      const result = await cursor.toArray();
-      res.send(result);
+    //delete user
+    app.delete("/deleteUser/:email", async (req, res) => {
+      const email = req.params.email;
+      console.log(email)
+    const query = {
+      email: email
+    };
+    const result = await userCollection.deleteOne(query);
+    res.send(result);
+    });
+
+
+
+
+     //verify user
+     app.patch("/verifyUser/:email", async (req, res) => {
+      const email = req.params.email;
+      // console.log(email)
+    const query = {
+      email: email
+    };
+    const updateDoc = {
+      $set: {
+        SellerVerify: true
+      },
+    };
+
+    const updateDoc1 = {
+      $set: {
+        verify: true
+      },
+    };
+    const result = await userCollection.updateOne(query,updateDoc1);
+
+    const filter = { SellerEmail: email };
+    const result1 = await productCollection.updateMany(filter,updateDoc);
+    const result2 = await advertiseCollection.updateMany(filter,updateDoc);
+    res.send(result);
     });
   } catch {
     console.log("server error");
