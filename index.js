@@ -22,9 +22,18 @@ async function run() {
   const productCollection = client.db("Assignment12").collection("products");
   const advertiseCollection = client.db("Assignment12").collection("advertise");
   const bookingCollection = client.db("Assignment12").collection("booking");
+  const reportCollection = client.db("Assignment12").collection("report");
   
   try {
 
+      //find id booking Product
+      app.get("/myOrders/:id", async (req, res) => {
+        const id = req.params.id;
+        console.log(id)
+        const query = { _id: ObjectId(id) };
+        const result = await bookingCollection.findOne(query);
+        res.send(result);
+      });
 
     //find all advertise Product
     app.get("/advertiseItems", async (req, res) => {
@@ -60,11 +69,27 @@ async function run() {
       res.send(result);
     });
 
+     //find all report
+     app.get("/report", async (req, res) => {
+      const query = {};
+      const cursor = reportCollection.find(query);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
     //insert userinfo into the database
     app.post("/storeUser", async (req, res) => {
       const userInfo = req.body;
       // console.log(userInfo);
       const result = await userCollection.insertOne(userInfo);
+      res.send(result);
+    });
+
+     //insert report into the database
+     app.post("/report", async (req, res) => {
+      const reportInfo = req.body;
+      console.log(reportInfo);
+      const result = await reportCollection.insertOne(reportInfo);
       res.send(result);
     });
 
@@ -102,6 +127,17 @@ async function run() {
           const result = await cursor.toArray();
           res.send(result);
         });
+
+       //find all booking Product
+       app.get("/myOrders/:email", async (req, res) => {
+        const email = req.params.email;
+        // console.log(email)
+        const query = {BuyerEmail: email};
+        const cursor = bookingCollection.find(query);
+        const result = await cursor.toArray();
+        res.send(result);
+      });
+      
 
         // app.patch("/akash/:email", async (req, res) => {
         //   const email = req.params.email;
@@ -145,7 +181,29 @@ async function run() {
     const result = await userCollection.deleteOne(query);
     res.send(result);
     });
+   
 
+    //delete report product
+    app.delete("/deleteProduct/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log(id)
+    const query1 = {
+      _id: id
+    };
+    const result = await reportCollection.deleteOne(query1);
+
+    const query2 = {
+      _id: ObjectId(id)
+    };
+    const result1 = await productCollection.deleteOne(query2);
+    
+    const query3 = {
+      _id: id
+    };
+    const result2 = await advertiseCollection.deleteOne(query3);
+
+    res.send(result);
+    });
 
 
 
