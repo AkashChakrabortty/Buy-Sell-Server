@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+const jwt = require('jsonwebtoken');
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -16,6 +17,26 @@ const client = new MongoClient(uri, {
   useUnifiedTopology: true,
   serverApi: ServerApiVersion.v1,
 });
+
+function verifyJWT(req, res, next) {
+
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+      return res.status(401).send('unauthorized access');
+  }
+
+  const token = authHeader.split(' ')[1];
+
+  jwt.verify(token, process.env.ACCESS_TOKEN, function (err, decoded) {
+      if (err) {
+          return res.status(403).send({ message: 'forbidden access' })
+      }
+      req.decoded = decoded;
+      next();
+  })
+
+}
+
 
 async function run() {
   const userCollection = client.db("Assignment12").collection("users");
@@ -36,12 +57,23 @@ async function run() {
       });
 
     //find all advertise Product
-    app.get("/advertiseItems", async (req, res) => {
+    app.get("/advertiseItems", verifyJWT ,async (req, res) => {
       const query = { };
       const cursor = advertiseCollection.find(query);
       const result = await cursor.toArray();
       res.send(result);
     });
+    //JWT
+    app.get('/jwt', async (req, res) => {
+      const email = req.query.email;
+      const query = { email: email };
+      const user = await userCollection.findOne(query);
+      if (user) {
+          const token = jwt.sign({ email }, process.env.ACCESS_TOKEN, { expiresIn: '30d' })
+          return res.send({ accessToken: token });
+      }
+      res.status(403).send({ accessToken: '' })
+  });
 
     //find a seller's all Product
     app.get("/dashboard/myProducts/:email", async (req, res) => {
@@ -129,9 +161,13 @@ async function run() {
         });
 
        //find all booking Product
-       app.get("/myOrders/:email", async (req, res) => {
+       app.get("/myOrders/:email", verifyJWT , async (req, res) => {
         const email = req.params.email;
         // console.log(email)
+        const decodedEmail = req.decoded.email;
+        if(email !== decodedEmail){
+          return res.status(403).send({message: "forbiden access"})
+        }
         const query = {BuyerEmail: email};
         const cursor = bookingCollection.find(query);
         const result = await cursor.toArray();
