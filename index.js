@@ -18,26 +18,6 @@ const client = new MongoClient(uri, {
   serverApi: ServerApiVersion.v1,
 });
 
-function verifyJWT(req, res, next) {
-
-  const authHeader = req.headers.authorization;
-  if (!authHeader) {
-      return res.status(401).send('unauthorized access');
-  }
-
-  const token = authHeader.split(' ')[1];
-
-  jwt.verify(token, process.env.ACCESS_TOKEN, function (err, decoded) {
-      if (err) {
-          return res.status(403).send({ message: 'forbidden access' })
-      }
-      req.decoded = decoded;
-      next();
-  })
-
-}
-
-
 async function run() {
   const userCollection = client.db("Assignment12").collection("users");
   const productCollection = client.db("Assignment12").collection("products");
@@ -57,7 +37,7 @@ async function run() {
       });
 
     //find all advertise Product
-    app.get("/advertiseItems", verifyJWT ,async (req, res) => {
+    app.get("/advertiseItems", async (req, res) => {
       const query = { };
       const cursor = advertiseCollection.find(query);
       const result = await cursor.toArray();
@@ -161,7 +141,7 @@ async function run() {
         });
 
        //find all booking Product
-       app.get("/myOrders/:email", verifyJWT , async (req, res) => {
+       app.get("/myOrders/:email", async (req, res) => {
         const email = req.params.email;
         // console.log(email)
         const decodedEmail = req.decoded.email;
