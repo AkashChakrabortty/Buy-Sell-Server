@@ -141,17 +141,18 @@ async function run() {
         });
 
        //find all booking Product
-       app.get("/myOrders/:email", async (req, res) => {
-        const email = req.params.email;
-        // console.log(email)
-        const decodedEmail = req.decoded.email;
-        if(email !== decodedEmail){
-          return res.status(403).send({message: "forbiden access"})
-        }
-        const query = {BuyerEmail: email};
-        const cursor = bookingCollection.find(query);
-        const result = await cursor.toArray();
-        res.send(result);
+       app.get("/dashboard/myOrders/:email", async (req, res) => {
+
+      
+          const email = req.params.email;
+          console.log(email)
+          const query = {BuyerEmail: email};
+          const cursor = bookingCollection.find(query);
+          const result = await cursor.toArray();
+          res.send(result);
+        
+       
+       
       });
       
 
@@ -169,7 +170,7 @@ async function run() {
         // });
       
       //insert advertise productinfo into the database
-     app.post("/advertise", async (req, res) => {
+     app.post("/dashboard/advertise", async (req, res) => {
       const productInfo = req.body;
       // console.log(productInfo);
       const result = await advertiseCollection.insertOne(productInfo);
@@ -177,7 +178,7 @@ async function run() {
     });
 
     //delete product
-    app.delete("/advertise/:id", async (req, res) => {
+    app.delete("/dashboard/advertise/:id", async (req, res) => {
       const id = req.params.id;
       console.log(id)
     const query = {
