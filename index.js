@@ -19,11 +19,11 @@ const client = new MongoClient(uri, {
 });
 
 async function run() {
-  const userCollection = client.db("Assignment12").collection("users");
-  const productCollection = client.db("Assignment12").collection("products");
-  const advertiseCollection = client.db("Assignment12").collection("advertise");
-  const bookingCollection = client.db("Assignment12").collection("booking");
-  const reportCollection = client.db("Assignment12").collection("report");
+  const userCollection = client.db("BuySell").collection("users");
+  const productCollection = client.db("BuySell").collection("products");
+  const advertiseCollection = client.db("BuySell").collection("advertise");
+  const bookingCollection = client.db("BuySell").collection("booking");
+  const reportCollection = client.db("BuySell").collection("report");
   
   try {
 
@@ -155,24 +155,9 @@ async function run() {
        
       });
       
-
-        // app.patch("/akash/:email", async (req, res) => {
-        //   const email = req.params.email;
-        //   const filter = { email: email };
-        //   const options = { upsert: true };
-        //   const updateDoc = {
-        //     $set: {
-        //       SellerVerify: false
-        //     },
-        //   };
-        //   const result = await userCollection.updateOne(filter, updateDoc, options);
-        //   res.send(result);
-        // });
-      
       //insert advertise productinfo into the database
      app.post("/dashboard/advertise", async (req, res) => {
       const productInfo = req.body;
-      // console.log(productInfo);
       const result = await advertiseCollection.insertOne(productInfo);
       res.send(result);
     });
@@ -181,10 +166,14 @@ async function run() {
     app.delete("/dashboard/advertise/:id", async (req, res) => {
       const id = req.params.id;
       console.log(id)
-    const query = {
+      const query = {
       _id: ObjectId(id)
     };
+    const query1 = {
+      _id: id,
+    };
     const result = await productCollection.deleteOne(query);
+    const result1 = await advertiseCollection.deleteOne(query1);
     res.send(result);
     });
 
